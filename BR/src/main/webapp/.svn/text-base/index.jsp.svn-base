@@ -1,0 +1,2 @@
+<%--<%response.sendRedirect("user/my_configure.html");%>--%>
+<%response.sendRedirect("index1.html");%>

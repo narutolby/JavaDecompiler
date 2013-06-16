@@ -1,0 +1,221 @@
+
+/*content*/
+  #content{
+      margin-top: 20px !important;
+  }
+/*left*/
+.article{
+   float:left;
+   width:640px;
+   padding-left:0px;
+}
+
+.glide_wrapper{
+   width: 640px;
+   margin-bottom: 30px;
+}
+
+.glide_title_img{
+   display:block;
+   float:left;
+   line-height:25px;
+   width:200px;
+   background:url("../img/glide_title_bg.jpg") no-repeat;
+   color:#FFFFFF;
+   font-weight:bold;
+   font-size: 14px;
+   padding-top:5px;
+   padding-left:50px;
+   text-align:left;
+}
+
+.btn_prev{
+   background: url("../img/btn_next.jpg");
+   float:right;
+   width:21px;
+   height:19px;
+   margin:10px 10px 0 0;
+}
+
+.btn_next{
+    background: url("../img/btn_prev.jpg");
+    float:right;
+    width:21px;
+    height:19px;
+    margin:10px 30px 0 0;
+}
+
+.glide_content{
+   clear: both;
+   position: relative;
+   border:1px #D1D1D1 solid;
+   padding:5px 15px 5px 15px;
+   overflow: hidden;
+}
+
+.glide_content ul{
+   display:block;
+   padding:0px 0px 0px 0px;
+   margin:0px 0px 0px 0px;
+   }
+   
+.dashed{
+   border-top:1px #D1D1D1 dashed !important; 
+}
+
+.glide_content ul li{
+   float:left;
+   display:block;
+   padding:20px 15px 20px 15px;
+   border-top:0px;
+}
+
+.glide_content_list{
+    overflow: hidden;
+    position:relative;
+    width:623px;
+}
+
+.info{
+   float:left;
+   width:270px;
+   height:200px;
+}
+
+.info_1{
+   display:block;
+   width:120px;
+/*   height:90px;*/
+   float:right;
+   color:#666666;
+   font-size:13px;
+   overflow:hidden;
+   margin-right:30px;
+   text-align: left;
+}
+
+.info_2{
+   display:block;
+   clear:both;
+   color:#666666;
+   font-size:13px;
+}
+
+#glide_1 {
+    width:608px;
+    height:372px;
+}
+
+#glide_1 ul li{
+   position:relative;
+}
+
+#glide_2 {
+    width:608px;
+    height:703px;
+}
+
+#glide_3 {
+    width:608px;
+    height:335px;
+}
+
+.clearfix:after {
+  content: ".";
+  clear: both;
+  height: 0;
+  visibility: hidden;
+  display: block;
+}
+
+/*right*/
+
+.aside{
+   float:right;
+   width:260px;
+   
+}
+
+.tabs_wrapper{
+   margin-bottom:30px;
+}
+.block_title_img{
+   display:block;
+   padding:0px;
+   margin-left:-4px;
+   background:url("../img/glide_title_bg.jpg") no-repeat;
+   width:244px;
+   line-height:25px;
+   color:#FFFFFF;
+   font-weight:bold;
+   font-size: 14px;
+   padding-top:5px;
+   padding-left:50px;
+   text-align:left;
+}
+.block_content{
+   border:1px #D1D1D1 solid; 
+   font-size:13px;
+   color:#666666;
+}
+
+.block_content img{
+    float:left;
+}
+
+.block_content div{
+   height:85px;
+   padding:10px 20px 0px 20px; 
+}
+.block_content div p{
+   float:right;
+   text-align: left;
+    width: 130px;
+}
+
+.block_content ul{
+   display:block;
+   
+}
+
+.block_content li{
+   display:block;   
+   padding-left:5px;
+   padding-bottom:5px;
+}
+
+#tagKind_1{
+   color:#666666;
+}
+
+/*
+.tagTitle_1{
+   font-weight:bold;
+}*/
+
+#tagList{
+    padding-top: 10px;
+    border-radius: 5px;
+}
+
+.subTagList{
+    border-bottom: 1px dashed #DDD;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+#tagList li ul{
+    overflow: hidden;
+}
+
+#tagList li ul li{
+    float:left;
+    width:70px;            /**/
+    font-family: Arial,Helvetica,sans-serif;
+    text-align: left;     /**/
+    margin-left: 5px;     /**/
+}
+
+.subTagList ul li a:hover{
+    background: #D1EDFA;
+}

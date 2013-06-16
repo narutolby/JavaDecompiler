@@ -1,0 +1,122 @@
+of testing. Typical clusters have hundreds of chunkservers
+and hundreds of clients.
+All the machines are configured with dual 1.4 GHz PIII
+processors, 2 GB of memory, two 80 GB 5400 rpm disks, and
+a 100 Mbps full-duplex Ethernet connection to an HP 2524
+switch. All 19 GFS server machines are connected to one
+switch, and all 16 client machines to the other. The two
+switches are connected with a 1 Gbps link.
+6.1.1 Reads
+N clients read simultaneously from the file system. Each
+client reads a randomly selected 4 MB region from a 320 GB
+file set. This is repeated 256 times so that each client ends
+up reading 1 GB of data. The chunkservers taken together
+have only 32 GB of memory, so we expect at most a 10% hit
+rate in the Linux buffer cache. Our results should be close
+to cold cache results.
+Figure 3(a) shows the aggregate read rate for N clients
+and its theoretical limit. The limit peaks at an aggregate of
+125 MB/s when the 1 Gbps link between the two switches
+is saturated, or 12.5 MB/s per client when its 100 Mbps
+network interface gets saturated, whichever applies. The
+observed read rate is 10 MB/s, or 80% of the per-client
+limit, when just one client is reading. The aggregate read
+rate reaches 94 MB/s, about 75% of the 125 MB/s link limit,
+for 16 readers, or 6 MB/s per client. The efficiency drops
+from 80% to 75% because as the number of readers increases,
+so does the probability that multiple readers simultaneously
+read from the same chunkserver.
+6.1.2 Writes
+N clients write simultaneously to N distinct files. Each
+client writes 1 GB of data to a new file in a series of 1 MB
+writes. The aggregate write rate and its theoretical limit are
+shown in Figure 3(b). The limit plateaus at 67 MB/s be-
+cause we need to write each byte to 3 of the 16 chunkservers,
+each with a 12.5 MB/s input connection.
+The write rate for one client is 6.3 MB/s, about half of the
+limit. The main culprit for this is our network stack. It does
+not interact very well with the pipelining scheme we use for
+pushing data to chunk replicas. Delays in propagating data
+from one replica to another reduce the overall write rate.
+Aggregate write rate reaches 35 MB/s for 16 clients (or
+2.2 MB/s per client), about half the theoretical limit. As in
+the case of reads, it becomes more likely that multiple clients
+write concurrently to the same chunkserver as the number
+of clients increases. Moreover, collision is more likely for 16
+writers than for 16 readers because each write involves three
+different replicas.
+Writes are slower than we would like. In practice this has
+not been a major problem because even though it increases
+the latencies as seen by individual clients, it does not sig-
+nificantly affect the aggregate write bandwidth delivered by
+the system to a large number of clients.
+6.1.3 Record Appends
+Figure 3(c) shows record append performance. N clients
+append simultaneously to a single file. Performance is lim-
+ited by the network bandwidth of the chunkservers that
+store the last chunk of the file, independent of the num-
+ber of clients. It starts at 6.0 MB/s for one client and drops
+to 4.8 MB/s for 16 clients, mostly due to congestion and
+variances in network transfer rates seen by different clients.
+Our applications tend to produce multiple such files con-
+currently. In other words, N clients append to M shared
+files simultaneously where both N and M are in the dozens
+or hundreds. Therefore, the chunkserver network congestion
+in our experiment is not a significant issue in practice be-
+cause a client can make progress on writing one file while
+the chunkservers for another file are busy.
+6.2 Real World Clusters
+We now examine two clusters in use within Google that
+are representative of several others like them. Cluster A is
+used regularly for research and development by over a hun-
+dred engineers. A typical task is initiated by a human user
+and runs up to several hours. It reads through a few MBs
+to a few TBs of data, transforms or analyzes the data, and
+writes the results back to the cluster. Cluster B is primarily
+used for production data processing. The tasks last much
+Cluster
+Chunkservers
+Available disk space
+Used disk space
+Number of Files
+Number of Dead files
+Number of Chunks
+Metadata at chunkservers
+Metadata at master
+A
+342
+72 TB
+55 TB
+735
+k
+22
+k
+992
+k
+13 GB
+48 MB
+B
+227
+180 TB
+155 TB
+737
+k
+232
+k
+1550
+k
+21 GB
+60 MB
+Table 2: Characteristics of two GFS clusters
+longer and continuously generate and process multi-TB data
+sets with only occasional human intervention. In both cases,
+a single “task” consists of many processes on many machines
+reading and writing many files simultaneously.
+6.2.1 Storage
+As shown by the first five entries in the table, both clusters
+have hundreds of chunkservers, support many TBs of disk
+space, and are fairly but not completely full. “Used space”
+includes all chunk replicas. Virtually all files are replicated
+three times. Therefore, the clusters store 18 TB and 52 TB
+of file data respectively.
+The two clusters have similar numbers of files, though B

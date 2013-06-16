@@ -1,0 +1,3 @@
+<%@ page contentType="text/html;charset=UTF-8"%><li> <div class="info"><p class="info_left">${subTopic.pubDate}&nbsp; <span class="m_t">${subTopic.authorName} ${subTopic.role==1?"老师":"学生"} 发言：</span></p>
+  <p class="info_right"><button class="active" p_id="${subTopic.id}">回复</button>&nbsp; |&nbsp; 举报</p></div>
+  <p class="reply">${subTopic.content}</p> </li>

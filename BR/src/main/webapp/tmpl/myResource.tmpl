@@ -1,0 +1,17 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+
+<li>
+    <div class="resc_tip"></div>
+    <div class="resc_tip_div"><img src="img/money.png" style="width:16px;height:16px"><span>5</span>
+       <dl><dd><img src="img/star_1.png" style="width:16px;height:16px"></dd>
+                           <dd><img src="img/star_1.png" style="width:16px;height:16px"></dd>
+                           <dd><img src="img/star_1.png" style="width:16px;height:16px"></dd>
+                           <dd><img src="img/star_1.png" style="width:16px;height:16px"></dd>
+                           <dd><img src="img/star_1.png" style="width:16px;height:16px"></dd>
+                       </dl><a href="elec_resrc/elec_resrc_detail.html"><img src="img/comment.png" style="width: 20px;height:20px;position: absolute;right: 5px;top: 5px;"/></a></div>
+    <div><a href="elec_resrc/elec_resrc_detail.html?resourceId=${model.id}"><img src="img/fileIcon/${model.resourceType}.png"></a></div>
+    <p title="${model.resourceRealName}">${model.resourceRealName}</p>
+    <a href="resourceOperation/download.html?resourceId=${model.id}" class="btn_myResrc resrcDown">下载</a>
+    <!-- <a href="" class="btn_myResrc">分享</a> -->
+    {{if isTeacher==1}}<a href="javascript:void(0)" class="btn_myResrc resrcDel" rel="${model.id}">删除</a>  {{/if}}
+</li>

@@ -1,0 +1,116 @@
+records.
+Practically all our applications mutate files by appending
+rather than overwriting. In one typical use, a writer gener-
+ates a file from beginning to end. It atomically renames the
+file to a permanent name after writing all the data, or pe-
+riodically checkpoints how much has been successfully writ-
+ten. Checkpoints may also include application-level check-
+sums. Readers verify and process only the file region up
+to the last checkpoint, which is known to be in the defined
+state. Regardless of consistency and concurrency issues, this
+approach has served us well. Appending is far more effi-
+cient and more resilient to application failures than random
+writes. Checkpointing allows writers to restart incremen-
+tally and keeps readers from processing successfully written
+file data that is still incomplete from the application’s per-
+spective.
+In the other typical use, many writers concurrently ap-
+pend to a file for merged results or as a producer-consumer
+queue. Record append’s append-at-least-once semantics pre-
+serves each writer’s output. Readers deal with the occa-
+sional padding and duplicates as follows. Each record pre-
+pared by the writer contains extra information like check-
+sums so that its validity can be verified. A reader can
+identify and discard extra padding and record fragments
+using the checksums. If it cannot tolerate the occasional
+duplicates (e.g., if they would trigger non-idempotent op-
+erations), it can filter them out using unique identifiers in
+the records, which are often needed anyway to name corre-
+sponding application entities such as web documents. These
+functionalities for record I/O (except duplicate removal) are
+in library code shared by our applications and applicable to
+other file interface implementations at Google. With that,
+the same sequence of records, plus rare duplicates, is always
+delivered to the record reader.
+3. SYSTEM INTERACTIONS
+We designed the system to minimize the master’s involve-
+ment in all operations. With that background, we now de-
+scribe how the client, master, and chunkservers interact to
+implement data mutations, atomic record append, and snap-
+shot.
+3.1 Leases and Mutation Order
+A mutation is an operation that changes the contents or
+metadata of a chunk such as a write or an append opera-
+tion. Each mutation is performed at all the chunk’s replicas.
+We use leases to maintain a consistent mutation order across
+replicas. The master grants a chunk lease to one of the repli-
+cas, which we call the primary. The primary picks a serial
+order for all mutations to the chunk. All replicas follow this
+order when applying mutations. Thus, the global mutation
+order is defined first by the lease grant order chosen by the
+master, and within a lease by the serial numbers assigned
+by the primary.
+The lease mechanism is designed to minimize manage-
+ment overhead at the master. A lease has an initial timeout
+of 60 seconds. However, as long as the chunk is being mu-
+tated, the primary can request and typically receive exten-
+sions from the master indefinitely. These extension requests
+and grants are piggybacked on the HeartBeat messages reg-
+ularly exchanged between the master and all chunkservers.
+The master may sometimes try to revoke a lease before it
+expires (e.g., when the master wants to disable mutations
+on a file that is being renamed). Even if the master loses
+communication with a primary, it can safely grant a new
+lease to another replica after the old lease expires.
+In Figure 2, we illustrate this process by following the
+control flow of a write through these numbered steps.
+1. The client asks the master which chunkserver holds
+the current lease for the chunk and the locations of
+the other replicas. If no one has a lease, the master
+grants one to a replica it chooses (not shown).
+2. The master replies with the identity of the primary and
+the locations of the other (secondary) replicas. The
+client caches this data for future mutations. It needs
+to contact the master again only when the primary
+4
+step 1
+2
+3
+Secondary
+Replica A
+7
+file region may end up containing fragments from different
+clients, although the replicas will be identical because the in-
+dividual operations are completed successfully in the same
+order on all replicas. This leaves the file region in consistent
+but undefined state as noted in Section 2.7.
+Master
+Client
+6
+Primary
+Replica
+3.2 Data Flow
+5
+Legend:
+Secondary
+Replica B
+6
+Control
+Data
+Figure 2: Write Control and Data Flow
+3.
+4.
+5.
+6.
+7.
+becomes unreachable or replies that it no longer holds
+a lease.
+The client pushes the data to all the replicas. A client
+can do so in any order. Each chunkserver will store
+the data in an internal LRU buffer cache until the
+data is used or aged out. By decoupling the data flow
+from the control flow, we can improve performance by
+scheduling the expensive data flow based on the net-
+work topology regardless of which chunkserver is the
+primary. Section 3.2 discusses this further.
+Once all the replicas have acknowledged receiving the

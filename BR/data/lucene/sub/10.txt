@@ -1,0 +1,88 @@
+date replicas. The master and these replicas all record the
+new version number in their persistent state. This occurs
+before any client is notified and therefore before it can start
+writing to the chunk. If another replica is currently unavail-
+able, its chunk version number will not be advanced. The
+master will detect that this chunkserver has a stale replica
+when the chunkserver restarts and reports its set of chunks
+and their associated version numbers. If the master sees a
+version number greater than the one in its records, the mas-
+ter assumes that it failed when granting the lease and so
+takes the higher version to be up-to-date.
+The master removes stale replicas in its regular garbage
+collection. Before that, it effectively considers a stale replica
+not to exist at all when it replies to client requests for chunk
+information. As another safeguard, the master includes
+the chunk version number when it informs clients which
+chunkserver holds a lease on a chunk or when it instructs
+a chunkserver to read the chunk from another chunkserver
+in a cloning operation. The client or the chunkserver verifies
+the version number when it performs the operation so that
+it is always accessing up-to-date data.
+5.
+FAULT TOLERANCE AND DIAGNOSIS
+One of our greatest challenges in designing the system is
+dealing with frequent component failures. The quality and
+quantity of components together make these problems more
+the norm than the exception: we cannot completely trust
+the machines, nor can we completely trust the disks. Com-
+ponent failures can result in an unavailable system or, worse,
+corrupted data. We discuss how we meet these challenges
+and the tools we have built into the system to diagnose prob-
+lems when they inevitably occur.
+5.1 High Availability
+Among hundreds of servers in a GFS cluster, some are
+bound to be unavailable at any given time. We keep the
+overall system highly available with two simple yet effective
+strategies: fast recovery and replication.
+5.1.1 Fast Recovery
+Both the master and the chunkserver are designed to re-
+store their state and start in seconds no matter how they
+terminated. In fact, we do not distinguish between normal
+and abnormal termination; servers are routinely shut down
+just by killing the process. Clients and other servers experi-
+ence a minor hiccup as they time out on their outstanding
+requests, reconnect to the restarted server, and retry. Sec-
+tion 6.2.2 reports observed startup times.
+5.1.2 Chunk Replication
+As discussed earlier, each chunk is replicated on multiple
+chunkservers on different racks. Users can specify different
+replication levels for different parts of the file namespace.
+The default is three. The master clones existing replicas as
+needed to keep each chunk fully replicated as chunkservers
+go offline or detect corrupted replicas through checksum ver-
+ification (see Section 5.2). Although replication has served
+us well, we are exploring other forms of cross-server redun-
+dancy such as parity or erasure codes for our increasing read-
+only storage requirements. We expect that it is challenging
+but manageable to implement these more complicated re-
+dundancy schemes in our very loosely coupled system be-
+cause our traffic is dominated by appends and reads rather
+than small random writes.
+5.1.3 Master Replication
+The master state is replicated for reliability. Its operation
+log and checkpoints are replicated on multiple machines. A
+mutation to the state is considered committed only after
+its log record has been flushed to disk locally and on all
+master replicas. For simplicity, one master process remains
+in charge of all mutations as well as background activities
+such as garbage collection that change the system internally.
+When it fails, it can restart almost instantly. If its machine
+or disk fails, monitoring infrastructure outside GFS starts a
+new master process elsewhere with the replicated operation
+log. Clients use only the canonical name of the master (e.g.
+gfs-test), which is a DNS alias that can be changed if the
+master is relocated to another machine.
+Moreover, “shadow” masters provide read-only access to
+the file system even when the primary master is down. They
+are shadows, not mirrors, in that they may lag the primary
+slightly, typically fractions of a second. They enhance read
+availability for files that are not being actively mutated or
+applications that do not mind getting slightly stale results.
+In fact, since file content is read from chunkservers, appli-
+cations do not observe stale file content. What could be
+stale within short windows is file metadata, like directory finally compute and record the new checksums. If we do
+contents or access control information. not verify the first and last blocks before overwriting them
+To keep itself informed, a shadow master reads a replica of partially, the new checksums may hide corruption that exists
+the growing operation log and applies the same sequence of in the regions not being overwritten.
+changes to its data structures exactly as the primary does. During idle periods, chunkservers can scan and verify the

@@ -1,0 +1,6 @@
+<%@ page contentType="text/html;charset=UTF-8"%><tr class="folder folder_nodes" id="resourceTable"><td class="folder-nodes-icon" id="${resource.id}">${resource.resourceRealName}</td>
+<td id="userId">${resource.uploadUser.userId}</td>
+<td>${resource.uploadUser.userName}</td>
+<td>${resource.uploadTime}</td>
+<td><a href='resourceOperation/download.html?resourceId=${resource.id}'><img src="img/icon_download_small.png"/></a></td>
+<td>审核未过</td></tr>

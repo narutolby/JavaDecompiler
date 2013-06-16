@@ -1,0 +1,90 @@
+We believe that improvements in our networking stack will
+lift the current limitation on the write throughput seen by
+an individual client.
+GFS has successfully met our storage needs and is widely
+used within Google as the storage platform for research and
+development as well as production data processing. It is an
+important tool that enables us to continue to innovate and
+attack problems on the scale of the entire web.
+[5]
+[6]
+[7]
+[8]
+[9]
+[10]
+ACKNOWLEDGMENTS
+We wish to thank the following people for their contributions
+to the system or the paper. Brain Bershad (our shepherd)
+and the anonymous reviewers gave us valuable comments
+and suggestions. Anurag Acharya, Jeff Dean, and David des-
+Jardins contributed to the early design. Fay Chang worked
+on comparison of replicas across chunkservers. Guy Ed-
+jlali worked on storage quota. Markus Gutschke worked
+on a testing framework and security enhancements. David
+Kramer worked on performance enhancements. Fay Chang,
+Urs Hoelzle, Max Ibel, Sharon Perl, Rob Pike, and Debby
+Wallach commented on earlier drafts of the paper. Many of
+our colleagues at Google bravely trusted their data to a new
+file system and gave us useful feedback. Yoshka helped with
+early testing.
+REFERENCES
+[1] Thomas Anderson, Michael Dahlin, Jeanna Neefe,
+David Patterson, Drew Roselli, and Randolph Wang.
+Serverless network file systems. In Proceedings of the
+15th ACM Symposium on Operating System
+Principles, pages 109–126, Copper Mountain Resort,
+Colorado, December 1995.
+[2] Remzi H. Arpaci-Dusseau, Eric Anderson, Noah
+Treuhaft, David E. Culler, Joseph M. Hellerstein,
+David Patterson, and Kathy Yelick. Cluster I/O with
+River: Making the fast case common. In Proceedings
+of the Sixth Workshop on Input/Output in Parallel
+and Distributed Systems (IOPADS ’99), pages 10–22,
+Atlanta, Georgia, May 1999.
+[3] Luis-Felipe Cabrera and Darrell D. E. Long. Swift:
+Using distributed disk striping to provide high I/O
+data rates. Computer Systems, 4(4):405–436, 1991.
+[4] Garth A. Gibson, David F. Nagle, Khalil Amiri, Jeff
+Butler, Fay W. Chang, Howard Gobioff, Charles
+Hardin, Erik Riedel, David Rochberg, and Jim
+Zelenka. A cost-effective, high-bandwidth storage
+[11]
+[12]
+architecture. In Proceedings of the 8th Architectural
+Support for Programming Languages and Operating
+Systems, pages 92–103, San Jose, California, October
+1998.
+John Howard, Michael Kazar, Sherri Menees, David
+Nichols, Mahadev Satyanarayanan, Robert
+Sidebotham, and Michael West. Scale and
+performance in a distributed file system. ACM
+Transactions on Computer Systems, 6(1):51–81,
+February 1988.
+InterMezzo. http://www.inter-mezzo.org, 2003.
+Barbara Liskov, Sanjay Ghemawat, Robert Gruber,
+Paul Johnson, Liuba Shrira, and Michael Williams.
+Replication in the Harp file system. In 13th
+Symposium on Operating System Principles, pages
+226–238, Pacific Grove, CA, October 1991.
+Lustre. http://www.lustreorg, 2003.
+David A. Patterson, Garth A. Gibson, and Randy H.
+Katz. A case for redundant arrays of inexpensive disks
+(RAID). In Proceedings of the 1988 ACM SIGMOD
+International Conference on Management of Data,
+pages 109–116, Chicago, Illinois, September 1988.
+Frank Schmuck and Roger Haskin. GPFS: A
+shared-disk file system for large computing clusters. In
+Proceedings of the First USENIX Conference on File
+and Storage Technologies, pages 231–244, Monterey,
+California, January 2002.
+Steven R. Soltis, Thomas M. Ruwart, and Matthew T.
+O’Keefe. The Gobal File System. In Proceedings of the
+Fifth NASA Goddard Space Flight Center Conference
+on Mass Storage Systems and Technologies, College
+Park, Maryland, September 1996.
+Chandramohan A. Thekkath, Timothy Mann, and
+Edward K. Lee. Frangipani: A scalable distributed file
+system. In Proceedings of the 16th ACM Symposium
+on Operating System Principles, pages 224–237,
+Saint-Malo, France, October 1997.
+

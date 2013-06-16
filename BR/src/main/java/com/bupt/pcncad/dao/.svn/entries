@@ -1,0 +1,160 @@
+10
+
+dir
+312
+svn://211.151.57.197/BR/src/main/java/com/bupt/pcncad/dao
+svn://211.151.57.197
+
+
+
+2013-05-23T09:08:15.610713Z
+272
+naruto
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2a932f70-87d7-4e8e-96fd-45b92492e6a5
+
+DoubanJson
+dir
+
+HibernateGenericDaoImpl.java
+file
+
+
+
+
+2013-05-23T08:59:14.000000Z
+7f1794f7f761e5d475069b46b274241c
+2013-05-23T09:08:15.610713Z
+272
+naruto
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7627
+
+IHibernateGenericDao.java
+file
+
+
+
+
+2013-05-23T08:56:07.000000Z
+15f3d27f5b35f56fb5f6911dad4ba817
+2013-05-23T09:08:15.610713Z
+272
+naruto
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3854
+
+Test.java
+file
+
+
+
+
+2012-11-01T13:05:37.000000Z
+9e1c04035555ca3a068b010c3f87f896
+2012-11-01T14:27:43.331256Z
+69
+naruto
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+782
+
+academy
+dir
+
+bulletin
+dir
+
+community
+dir
+
+fetch
+dir
+
+invite
+dir
+
+resource
+dir
+
+tag
+dir
+
+topic
+dir
+
+user
+dir
+

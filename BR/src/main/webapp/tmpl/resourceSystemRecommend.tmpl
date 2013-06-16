@@ -1,0 +1,30 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+
+<li>
+    <div class="pic_sysRec"><img src="${model.imgSrc}">
+    </div>
+    <div class="detail_sysRec"><p class="title_sysRec">${model.bookName}</p>
+        <div><p class="subtitle_sysRec">${model.description}</p>
+            <div class="star_ratingCur">
+                <div>读者评价：</div>
+                <ul>
+                    <li><img src="img/rating_star.jpg"></li>
+                    <li><img src="img/rating_star.jpg"></li>
+                    <li><img src="img/rating_star.jpg"></li>
+                    <li><img src="img/rating_star.jpg"></li>
+                    <li><img src="img/rating_star.jpg"></li>
+                </ul>
+                <div>(已有${model.commentUserCount}人评价)</div>
+            </div>
+        </div>
+        <div class="clr"> </div>
+        <p class="cont_sysRec">${model.digest}</p>
+        <div>
+            <input type="button" class="btn_del" value="&nbsp;&nbsp;删除" />
+            <input type="button" class="btn_col" value="&nbsp;&nbsp;收藏" />
+            <input type="button" class="btn_down" value="&nbsp;&nbsp;下载"/>
+        </div>
+    </div>
+</li>
+
+

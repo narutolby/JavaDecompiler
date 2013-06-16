@@ -1,0 +1,92 @@
+disk space utilization, limiting active clone operations on
+any single chunkserver, and spreading replicas across racks.
+To keep cloning traffic from overwhelming client traffic, the
+master limits the numbers of active clone operations both
+for the cluster and for each chunkserver. Additionally, each
+chunkserver limits the amount of bandwidth it spends on
+each clone operation by throttling its read requests to the
+source chunkserver.
+Finally, the master rebalances replicas periodically: it ex-
+amines the current replica distribution and moves replicas
+for better disk space and load balancing. Also through this
+process, the master gradually fills up a new chunkserver
+rather than instantly swamps it with new chunks and the
+heavy write traffic that comes with them. The placement
+criteria for the new replica are similar to those discussed
+above. In addition, the master must also choose which ex-
+isting replica to remove. In general, it prefers to remove
+those on chunkservers with below-average free space so as
+to equalize disk space usage.
+4.4 Garbage Collection
+After a file is deleted, GFS does not immediately reclaim
+the available physical storage. It does so only lazily during
+regular garbage collection at both the file and chunk levels.
+We find that this approach makes the system much simpler
+and more reliable.
+4.4.1 Mechanism
+When a file is deleted by the application, the master logs
+the deletion immediately just like other changes. However
+instead of reclaiming resources immediately, the file is just
+renamed to a hidden name that includes the deletion times-
+tamp. During the master’s regular scan of the file system
+namespace, it removes any such hidden files if they have ex-
+isted for more than three days (the interval is configurable).
+Until then, the file can still be read under the new, special
+name and can be undeleted by renaming it back to normal.
+When the hidden file is removed from the namespace, its in-
+memory metadata is erased. This effectively severs its links
+to all its chunks.
+In a similar regular scan of the chunk namespace, the
+master identifies orphaned chunks (i.e., those not reachable
+from any file) and erases the metadata for those chunks. In
+a HeartBeat message regularly exchanged with the master,
+each chunkserver reports a subset of the chunks it has, and
+the master replies with the identity of all chunks that are no
+longer present in the master’s metadata. The chunkserver
+is free to delete its replicas of such chunks.
+4.4.2 Discussion
+Although distributed garbage collection is a hard problem
+that demands complicated solutions in the context of pro-
+gramming languages, it is quite simple in our case. We can
+easily identify all references to chunks: they are in the file-
+to-chunk mappings maintained exclusively by the master.
+We can also easily identify all the chunk replicas: they are
+Linux files under designated directories on each chunkserver.
+Any such replica not known to the master is “garbage.”
+The garbage collection approach to storage reclamation
+offers several advantages over eager deletion. First, it is
+simple and reliable in a large-scale distributed system where
+component failures are common. Chunk creation may suc-
+ceed on some chunkservers but not others, leaving replicas
+that the master does not know exist. Replica deletion mes-
+sages may be lost, and the master has to remember to resend
+them across failures, both its own and the chunkserver’s.
+Garbage collection provides a uniform and dependable way
+to clean up any replicas not known to be useful. Second,
+it merges storage reclamation into the regular background
+activities of the master, such as the regular scans of names-
+paces and handshakes with chunkservers. Thus, it is done
+in batches and the cost is amortized. Moreover, it is done
+only when the master is relatively free. The master can re-
+spond more promptly to client requests that demand timely
+attention. Third, the delay in reclaiming storage provides a
+safety net against accidental, irreversible deletion.
+In our experience, the main disadvantage is that the delay
+sometimes hinders user effort to fine tune usage when stor-
+age is tight. Applications that repeatedly create and delete
+temporary files may not be able to reuse the storage right
+away. We address these issues by expediting storage recla-
+mation if a deleted file is explicitly deleted again. We also
+allow users to apply different replication and reclamation
+policies to different parts of the namespace. For example,
+users can specify that all the chunks in the files within some
+directory tree are to be stored without replication, and any
+deleted files are immediately and irrevocably removed from
+the file system state.
+4.5 Stale Replica Detection
+Chunk replicas may become stale if a chunkserver fails
+and misses mutations to the chunk while it is down. For
+each chunk, the master maintains a chunk version number
+to distinguish between up-to-date and stale replicas.
+Whenever the master grants a new lease on a chunk, it
+increases the chunk version number and informs the up-to-

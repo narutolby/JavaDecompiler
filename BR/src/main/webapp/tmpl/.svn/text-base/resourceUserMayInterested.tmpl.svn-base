@@ -1,0 +1,14 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+
+<li>
+    <div class="pic_mayLike"><img src="${model.imgSrc}"></div>
+    <div class="detail_mayLike">
+         <a href="#" class="pic_title">&gt;${model.bookName}</a>
+         <p> ${model.digest}</p>
+         <p class="align"><a class="arrow" href="#">了解更多...</a></p>
+    </div>
+    <div class="clr"></div>
+</li>
+
+
+

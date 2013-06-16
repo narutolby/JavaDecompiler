@@ -1,0 +1,470 @@
+#aside {
+    width: 200px;
+    float: left;
+    font-size: 14px;
+    color: #666666;
+}
+#article {
+    width: 690px;
+    padding: 0 35px;
+    float: right;
+}
+
+#step1{
+    text-align: left;
+    background: #FFF9E3;
+    border: 1px #FDEB89 solid;
+    padding: 30px;
+}
+
+#step1 h3{
+    font-size: 14px;
+    color: #743E04;
+    margin-bottom: 20px;
+    font-weight: bold;
+    zoom: 1;
+}
+
+#uploadBtn{
+    background-color: #E0F3F9;
+    border: 1px #BCDDF0 solid;
+    padding-left: 410px;
+    padding-top:50px;
+    min-height: 95px;
+    position: relative;
+}
+
+#Filedata_mirror{
+    background: url("../img/btn_upload.jpg") no-repeat;
+    position: absolute;
+    width:157px;
+    height: 45px;
+    border:none;
+    cursor:pointer;
+    top:50px;
+    cursor: hand;
+}
+
+#Filedata{
+    position: relative;
+    width:157px;
+    height: 45px;
+    border:none;
+    cursor:pointer;
+    cursor: hand;
+}
+#Filedata object{
+    left:0px;
+}
+
+.icon {
+    background: url(../img/icons.gif) -1000px -1000px no-repeat;
+    padding: 2px 10px;
+    zoom: 1;
+    font-size: 12px;
+    cursor: default;
+    position: relative;
+    top: -1px;
+}
+
+.doc, .docx {
+    background-position: -72px 1px;
+}
+
+.ppt, .pptx {
+    background-position: -139px 1px;
+}
+
+.xls, .xlsx {
+    background-position: -105px 1px;
+}
+
+.vsd {
+    background-position: -173px 1px;
+}
+
+.pot {
+    background-position: -209px -27px;
+}
+
+.pps {
+    background-position: -209px 1px;
+}
+
+.rtf {
+    background-position: -140px -27px;
+}
+
+.wps {
+    background-position: -106px -26px;
+}
+
+.et {
+    background-position: -73px -26px;
+}
+
+.dps {
+    background-position: -174px -27px;
+}
+
+.pdf {
+    background-position: 0 1px;
+}
+
+.txt {
+    background-position: -36px 1px;
+}
+
+.epub {
+    background-position: -42px -142px;
+}
+#file-queue ul li{
+    text-align: left;
+    list-style: none;
+    padding:2px 0px;
+}
+#file-queue ul li a{
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.upload-detail{
+    background: #F4F9FC;
+    padding: 15px 0 20px 24px;
+    border: 1px solid #DDDFFB;
+}
+
+
+#step2 {
+    background: #f4f9fc;
+    padding: 15px 0 20px 24px;
+    border: 1px solid #DDDFFB;
+    margin-top: -1px;
+    position: relative;
+}
+
+#step2 p {
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+#step2 td.l {
+    text-align: right;
+    padding-right: 12px;
+    font-weight: bold;
+    font-size: 14px;
+    padding-top: 2px;
+}
+
+#step2 td.inp {
+    padding-top: 4px;
+}
+
+#step2 .i {
+    width: 500px;
+    font-size: 14px;
+    border: 1px solid #A0B4C5;
+    padding: 4px 2px 0 2px;
+}
+
+#step2 input.i {
+    height: 18px;
+}
+
+#step2 .input-tip {
+    text-align: right;
+    width: 504px;
+    line-height: 15px;
+    margin: 2px 0;
+}
+
+#step2 .input-err {
+    background-color: #FEF5F5;
+    border-color: #D5060D;
+}
+
+#step2 .init {
+    color: #ccc;
+}
+
+#step2 .keyword input {
+    width: 500px;
+}
+
+#step2 .keyword-tip {
+    color: #666;
+    margin-left: 300px;
+}
+
+#step2 .keyword p {
+    margin: 8px 0 4px;
+}
+
+#step2 .keyword a {
+    margin-right: 8px;
+    background: #E7F2F9;
+    border-bottom: 1px solid #b8d8ee;
+    border-right: 1px solid #b8d8ee;
+    padding: 2px;
+    margin-top: 3px;
+    display: inline-block; *
+display: inline; *
+zoom: 1;
+}
+
+#step2 .keyword a.selected {
+    color: #666;
+    background: #F4F9FC;
+}
+
+#step2 .charge {
+    font-size: 14px;
+}
+
+#step2 .charge input {
+    margin-right: 4px;
+}
+
+#step2 .charge p {
+    margin: 4px 0;
+    color: #666;
+}
+
+#step2 .charge span.icon {
+    vertical-align: 4px;
+    margin-left: 4px;
+}
+
+#step2 .submit input {
+    background: url(http://img.baidu.com/img/iknow/docshare/act_btn.png) 0 0
+    no-repeat;
+    width: 104px;
+    height: 35px;
+    border: none;
+    cursor: pointer;
+}
+
+#step2 .submit input.btn-over {
+    background-position: 0 -35px;
+}
+
+#step2 .submit input.btn-disable {
+    background-position: 0 -70px;
+}
+
+#step2 .submit span {
+    color: red;
+    margin-left: 6px;
+}
+
+#step2 .error {
+    color: #F00;
+    vertical-align: bottom;
+}
+
+#step2.multi-upload {
+    margin: 10px 0 0;
+    border-width: 1px 1px 0;
+    padding: 15px 0 0;
+}
+
+#step2.multi-upload .upload-tips {
+    margin-bottom: 20px;
+    padding: 0 20px;
+}
+
+#step2.multi-upload h3 {
+    color: #186174;
+    border-bottom: 1px dashed #949A9A;
+    padding: 0 20px 7px;
+}
+
+#step2.multi-upload #clip-form,#step2.multi-upload #close-fillall {
+    float: right;
+    font-size: 12px;
+    font-weight: normal; *
+padding-top: 8px;
+}
+
+#step2.multi-upload .doc-unit {
+    border-bottom: 1px solid #DDDFFB;
+}
+
+#step2.multi-upload .doc-focus {
+    background-color: #E7F2F9;
+}
+
+#step2.multi-upload .doc-unit h5 {
+    margin: 0;
+    font-size: 14px;
+    height: 30px;
+    line-height: 30px;
+    background: url(http://img.baidu.com/img/iknow/docshare/multiupload.png)
+    no-repeat 640px -14px;
+    cursor: pointer;
+    padding: 0 20px;
+    font-weight: normal;
+}
+
+#step2.multi-upload .doc-unit .title-bar {
+    display: none;
+}
+
+#step2.multi-upload .doc-unit h5.hover {
+    background-color: #E7F2F9;
+}
+
+#step2.multi-upload .doc-unit h5 .error-upload {
+    display: none;
+    height: 30px;
+    font-size: 12px;
+    color: #f00;
+    font-weight: normal;
+    padding-left: 28px;
+    background: url(http://img.baidu.com/img/iknow/docshare/multiupload.png)
+    no-repeat 0 -38px;
+}
+
+#step2.multi-upload .doc-unit.iserror h5 .error-upload {
+    display: inline-block;
+}
+
+#step2.multi-upload .iserror.hide h5 .error-upload {
+    display: none;
+}
+
+#step2.multi-upload .doc-unit.hide.iserror .title-bar {
+    color: #f00;
+}
+
+#step2.multi-upload .doc-unit.hide.iserror .title-bar .icon {
+    background: url(http://img.baidu.com/img/iknow/docshare/multiupload.png)
+    no-repeat 0 -43px;
+}
+
+#step2.multi-upload .doc-unit.hide h5 {
+    background-position: 640px 9px;
+}
+
+#step2.multi-upload .doc-unit.hide .title-bar {
+    display: inline-block;
+    width: 600px;
+    height: 30px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+#step2.multi-upload .doc-unit.hide .form-holder {
+    display: none;
+}
+
+#step2.multi-upload .doc-unit.hide h5 .icon {
+    margin-right: 7px;
+    margin-top: 6px;
+}
+
+#step2.multi-upload .form-holder {
+    padding: 10px 20px;
+    _zoom: 1;
+    _clear: both;
+}
+
+#step2.multi-upload .form-holder .error-tip {
+    margin: 5px 0 5px 0;
+    height: 16px;
+    line-height: 16px;
+    text-align: left;
+    color: #f00;
+    display: block;
+}
+
+#step2.multi-upload .form-holder .form-title .error-tip {
+    display: inline;
+}
+
+#step2.multi-upload .form-holder p.error-tip {
+    margin: 8px 0 0;
+    height: 20px;
+    display: block;
+    line-height: 16px;
+    text-align: left;
+    color: #f00;
+}
+
+#step2.multi-upload .form-holder .error-tip.not-error {
+    color: #747378;
+}
+
+#step2.multi-upload .reco-kw {
+    float: left;
+    margin-bottom: 0;
+    line-height: 18px;
+}
+
+#step2.multi-upload .doc-unit.only-one dl {
+    float: none;
+    width: 100%;
+    margin-top: 0;
+}
+
+#step2.multi-upload .doc-unit.only-one dd {
+    width: 586px;
+}
+
+#step2.multi-upload .only-one .form-holder dt {
+    width: 45px;
+    text-align: right;
+}
+
+#step2.multi-upload .only-one .form-holder .input-text,#step2.multi-upload .only-one .form-holder textarea
+{
+    width: 550px;
+}
+
+#step2.multi-upload .doc-unit.only-one .form-price {
+    padding-bottom: 15px;
+}
+
+#all-fill {
+    padding-bottom: 20px;
+}
+
+#uploadForm .input-init {
+    color: #CCC;
+}
+
+#uploadForm .input-init {
+    color: #CCC;
+}
+.multi-upload .form-holder .input-init {
+    color: #CCC;
+}
+.multi-upload .form-sumary textarea {
+    height: 120px;
+}
+.multi-upload .form-holder .input-text, .multi-upload .form-holder textarea {
+    border: 1px solid #A0B4C5;
+    font-size: 14px;
+    padding: 4px 2px 3px;
+    width: 264px;
+}
+
+
+#submitBtn {
+    background: url("../img/act_btn.png") no-repeat scroll 0 0 transparent;
+    border: none;
+    cursor: pointer;
+    height: 35px;
+    width: 104px;
+    text-indent: -9999px;
+    outline: none;
+}
+.class-table{
+    width: 160px;
+    border: 1px #48A4CB solid;
+}
+
+#selectContainer{
+    text-align: left;
+    padding-left:15px;
+}

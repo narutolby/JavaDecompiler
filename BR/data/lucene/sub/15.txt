@@ -1,0 +1,126 @@
+< .1
+0.1
+2.3
+0.3
+22.7
+1.2
+< .1
+5.8
+< .1
+38.4
+.1
+46.8
+53.9
+7.4
+Table 5: Bytes Transferred Breakdown by Opera-
+tion Size (%). For reads, the size is the amount of data
+actually read and transferred, rather than the amount re-
+quested. The two may differ if the read attempts to read
+beyond end of file, which by design is not uncommon in our
+workloads.
+Cluster
+Open
+Delete
+FindLocation
+FindLeaseHolder
+FindMatchingFiles
+All other combined
+X
+26.1
+0.7
+64.3
+7.8
+0.6
+0.5
+Y
+16.3
+1.5
+65.8
+13.4
+2.2
+0.8
+Table 6: Master Requests Breakdown by Type (%)
+proximates the case where a client deliberately overwrites
+previous written data rather than appends new data. For
+cluster X, overwriting accounts for under 0.0001% of bytes
+mutated and under 0.0003% of mutation operations. For
+cluster Y, the ratios are both 0.05%. Although this is minute,
+it is still higher than we expected. It turns out that most
+of these overwrites came from client retries due to errors or
+timeouts. They are not part of the workload per se but a
+consequence of the retry mechanism.
+6.3.4 Master Workload
+Table 6 shows the breakdown by type of requests to the
+master. Most requests ask for chunk locations (FindLo-
+cation) for reads and lease holder information (FindLease-
+Locker) for data mutations.
+Clusters X and Y see significantly different numbers of
+Delete requests because cluster Y stores production data
+sets that are regularly regenerated and replaced with newer
+versions. Some of this difference is further hidden in the
+difference in Open requests because an old version of a file
+may be implicitly deleted by being opened for write from
+scratch (mode “w” in Unix open terminology).
+FindMatchingFiles is a pattern matching request that sup-
+ports “ls” and similar file system operations. Unlike other
+requests for the master, it may process a large part of the
+namespace and so may be expensive. Cluster Y sees it much
+more often because automated data processing tasks tend to
+examine parts of the file system to understand global appli-
+cation state. In contrast, cluster X’s applications are under
+more explicit user control and usually know the names of all
+needed files in advance.
+7. EXPERIENCES
+In the process of building and deploying GFS, we have
+experienced a variety of issues, some operational and some
+technical.
+Initially, GFS was conceived as the backend file system
+for our production systems. Over time, the usage evolved
+to include research and development tasks. It started with
+little support for things like permissions and quotas but now
+includes rudimentary forms of these. While production sys-
+tems are well disciplined and controlled, users sometimes
+are not. More infrastructure is required to keep users from
+interfering with one another.
+Some of our biggest problems were disk and Linux related.
+Many of our disks claimed to the Linux driver that they
+supported a range of IDE protocol versions but in fact re-
+sponded reliably only to the more recent ones. Since the pro-
+tocol versions are very similar, these drives mostly worked,
+but occasionally the mismatches would cause the drive and
+the kernel to disagree about the drive’s state. This would
+corrupt data silently due to problems in the kernel. This
+problem motivated our use of checksums to detect data cor-
+ruption, while concurrently we modified the kernel to handle
+these protocol mismatches.
+Earlier we had some problems with Linux 2.2 kernels due
+to the cost of fsync(). Its cost is proportional to the size
+of the file rather than the size of the modified portion. This
+was a problem for our large operation logs especially before
+we implemented checkpointing. We worked around this for
+a time by using synchronous writes and eventually migrated
+to Linux 2.4.
+Another Linux problem was a single reader-writer lock
+which any thread in an address space must hold when it
+pages in from disk (reader lock) or modifies the address
+space in an mmap() call (writer lock). We saw transient
+timeouts in our system under light load and looked hard for
+resource bottlenecks or sporadic hardware failures. Even-
+tually, we found that this single lock blocked the primary
+network thread from mapping new data into memory while
+the disk threads were paging in previously mapped data.
+Since we are mainly limited by the network interface rather
+than by memory copy bandwidth, we worked around this by
+replacing mmap() with pread() at the cost of an extra copy.
+Despite occasional problems, the availability of Linux code
+has helped us time and again to explore and understand
+system behavior. When appropriate, we improve the kernel
+and share the changes with the open source community.
+8.
+RELATED WORK
+Like other large distributed file systems such as AFS [5],
+GFS provides a location independent namespace which en-
+ables data to be moved transparently for load balance or
+fault tolerance. Unlike AFS, GFS spreads a file’s data across
+storage servers in a way more akin to xFS [1] and Swift [3] in
+order to deliver aggregate performance and increased fault

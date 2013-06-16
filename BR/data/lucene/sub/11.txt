@@ -1,0 +1,66 @@
+Like the primary, it polls chunkservers at startup (and infre- contents of inactive chunks. This allows us to detect corrup-
+quently thereafter) to locate chunk replicas and exchanges tion in chunks that are rarely read. Once the corruption is
+frequent handshake messages with them to monitor their detected, the master can create a new uncorrupted replica
+status. It depends on the primary master only for replica and delete the corrupted replica. This prevents an inactive
+location updates resulting from the primary’s decisions to but corrupted chunk replica from fooling the master into
+create and delete replicas. thinking that it has enough valid replicas of a chunk.
+5.2 Data Integrity 5.3 Diagnostic Tools
+Each chunkserver uses checksumming to detect corruption Extensive and detailed diagnostic logging has helped im-
+of stored data. Given that a GFS cluster often has thousands measurably in problem isolation, debugging, and perfor-
+of disks on hundreds of machines, it regularly experiences mance analysis, while incurring only a minimal cost. With-
+disk failures that cause data corruption or loss on both the out logs, it is hard to understand transient, non-repeatable
+read and write paths. (See Section 7 for one cause.) We interactions between machines. GFS servers generate di-
+can recover from corruption using other chunk replicas, but agnostic logs that record many significant events (such as
+it would be impractical to detect corruption by comparing chunkservers going up and down) and all RPC requests and
+replicas across chunkservers. Moreover, divergent replicas replies. These diagnostic logs can be freely deleted without
+may be legal: the semantics of GFS mutations, in particular affecting the correctness of the system. However, we try to
+atomic record append as discussed earlier, does not guar- keep these logs around as far as space permits.
+antee identical replicas. Therefore, each chunkserver must The RPC logs include the exact requests and responses
+independently verify the integrity of its own copy by main- sent on the wire, except for the file data being read or writ-
+taining checksums. ten. By matching requests with replies and collating RPC
+A chunk is broken up into 64 KB blocks. Each has a corre- records on different machines, we can reconstruct the en-
+sponding 32 bit checksum. Like other metadata, checksums tire interaction history to diagnose a problem. The logs also
+are kept in memory and stored persistently with logging, serve as traces for load testing and performance analysis.
+separate from user data. The performance impact of logging is minimal (and far
+For reads, the chunkserver verifies the checksum of data outweighed by the benefits) because these logs are written
+blocks that overlap the read range before returning any data sequentially and asynchronously. The most recent events
+to the requester, whether a client or another chunkserver. are also kept in memory and available for continuous online
+Therefore chunkservers will not propagate corruptions to monitoring.
+other machines. If a block does not match the recorded 
+checksum, the chunkserver returns an error to the requestor 
+and reports the mismatch to the master. In response, the 
+requestor will read from other replicas, while the master 
+will clone the chunk from another replica. After a valid new 
+replica is in place, the master instructs the chunkserver that 
+reported the mismatch to delete its replica. 
+Checksumming has little effect on read performance for 
+several reasons. Since most of our reads span at least a 
+few blocks, we need to read and checksum only a relatively 
+small amount of extra data for verification. GFS client code 
+further reduces this overhead by trying to align reads at 
+checksum block boundaries. Moreover, checksum lookups 
+and comparison on the chunkserver are done without any 
+I/O, and checksum calculation can often be overlapped with 
+I/Os. 
+Checksum computation is heavily optimized for writes 
+that append to the end of a chunk (as opposed to writes 
+that overwrite existing data) because they are dominant in 
+our workloads. We just incrementally update the check- 
+sum for the last partial checksum block, and compute new 
+checksums for any brand new checksum blocks filled by the 
+append. Even if the last partial checksum block is already 
+corrupted and we fail to detect it now, the new checksum 
+value will not match the stored data, and the corruption will 
+be detected as usual when the block is next read. 
+In contrast, if a write overwrites an existing range of the 
+chunk, we must read and verify the first and last blocks of 
+the range being overwritten, then perform the write, and 
+6. MEASUREMENTS
+In this section we present a few micro-benchmarks to illus-
+trate the bottlenecks inherent in the GFS architecture and
+implementation, and also some numbers from real clusters
+in use at Google.
+6.1 Micro-benchmarks
+We measured performance on a GFS cluster consisting
+of one master, two master replicas, 16 chunkservers, and
+16 clients. Note that this configuration was set up for ease

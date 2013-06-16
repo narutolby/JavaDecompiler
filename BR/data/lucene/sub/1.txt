@@ -1,0 +1,99 @@
+atomic append operation so that multiple clients can append
+concurrently to a file without extra synchronization between
+them. These will be discussed in more details later in the
+paper.
+Multiple GFS clusters are currently deployed for different
+purposes. The largest ones have over 1000 storage nodes,
+over 300 TB of disk storage, and are heavily accessed by
+hundreds of clients on distinct machines on a continuous
+basis.
+2.
+DESIGN OVERVIEW
+2.1 Assumptions
+In designing a file system for our needs, we have been
+guided by assumptions that offer both challenges and op-
+portunities. We alluded to some key observations earlier
+and now lay out our assumptions in more details.
+• The system is built from many inexpensive commodity
+components that often fail. It must constantly monitor
+itself and detect, tolerate, and recover promptly from
+component failures on a routine basis.
+• The system stores a modest number of large files. We
+expect a few million files, each typically 100 MB or
+larger in size. Multi-GB files are the common case
+and should be managed efficiently. Small files must be
+supported, but we need not optimize for them.
+• The workloads primarily consist of two kinds of reads:
+large streaming reads and small random reads. In
+large streaming reads, individual operations typically
+read hundreds of KBs, more commonly 1 MB or more.
+Successive operations from the same client often read
+through a contiguous region of a file. A small ran-
+dom read typically reads a few KBs at some arbitrary
+offset. Performance-conscious applications often batch
+and sort their small reads to advance steadily through
+the file rather than go back and forth.
+• The workloads also have many large, sequential writes
+that append data to files. Typical operation sizes are
+similar to those for reads. Once written, files are sel-
+dom modified again. Small writes at arbitrary posi-
+tions in a file are supported but do not have to be
+efficient.
+• The system must efficiently implement well-defined se-
+mantics for multiple clients that concurrently append
+to the same file. Our files are often used as producer-
+consumer queues or for many-way merging. Hundreds
+of producers, running one per machine, will concur-
+rently append to a file. Atomicity with minimal syn-
+chronization overhead is essential. The file may be
+read later, or a consumer may be reading through the
+file simultaneously.
+• High sustained bandwidth is more important than low
+latency. Most of our target applications place a pre-
+mium on processing data in bulk at a high rate, while
+few have stringent response time requirements for an
+individual read or write.
+2.2 Interface
+GFS provides a familiar file system interface, though it
+does not implement a standard API such as POSIX. Files are
+organized hierarchically in directories and identified by path-
+names. We support the usual operations to create, delete,
+open, close, read, and write files.
+Moreover, GFS has snapshot and record append opera-
+tions. Snapshot creates a copy of a file or a directory tree
+at low cost. Record append allows multiple clients to ap-
+pend data to the same file concurrently while guaranteeing
+the atomicity of each individual client’s append. It is use-
+ful for implementing multi-way merge results and producer-
+consumer queues that many clients can simultaneously ap-
+pend to without additional locking. We have found these
+types of files to be invaluable in building large distributed
+applications. Snapshot and record append are discussed fur-
+ther in Sections 3.4 and 3.3 respectively.
+2.3 Architecture
+A GFS cluster consists of a single master and multiple
+chunkservers and is accessed by multiple clients, as shown
+in Figure 1. Each of these is typically a commodity Linux
+machine running a user-level server process. It is easy to run
+both a chunkserver and a client on the same machine, as long
+as machine resources permit and the lower reliability caused
+by running possibly flaky application code is acceptable.
+Files are divided into fixed-size chunks. Each chunk is
+identified by an immutable and globally unique 64 bit chunk
+handle assigned by the master at the time of chunk creation.
+Chunkservers store chunks on local disks as Linux files and
+read or write chunk data specified by a chunk handle and
+byte range. For reliability, each chunk is replicated on multi-
+ple chunkservers. By default, we store three replicas, though
+users can designate different replication levels for different
+regions of the file namespace.
+The master maintains all file system metadata. This in-
+cludes the namespace, access control information, the map-
+ping from files to chunks, and the current locations of chunks.
+It also controls system-wide activities such as chunk lease
+management, garbage collection of orphaned chunks, and
+chunk migration between chunkservers. The master peri-
+odically communicates with each chunkserver in HeartBeat
+messages to give it instructions and collect its state.
+GFS client code linked into each application implements
+the file system API and communicates with the master and

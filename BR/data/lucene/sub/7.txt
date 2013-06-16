@@ -1,0 +1,89 @@
+imum size, tells secondaries to do the same, and replies to
+the client indicating that the operation should be retried
+on the next chunk. (Record append is restricted to be at
+most one-fourth of the maximum chunk size to keep worst-
+case fragmentation at an acceptable level.) If the record
+fits within the maximum size, which is the common case,
+the primary appends the data to its replica, tells the secon-
+daries to write the data at the exact offset where it has, and
+finally replies success to the client.
+If a record append fails at any replica, the client retries the
+operation. As a result, replicas of the same chunk may con-
+tain different data possibly including duplicates of the same
+record in whole or in part. GFS does not guarantee that all
+replicas are bytewise identical. It only guarantees that the
+data is written at least once as an atomic unit. This prop-
+erty follows readily from the simple observation that for the
+operation to report success, the data must have been written
+at the same offset on all replicas of some chunk. Further-
+more, after this, all replicas are at least as long as the end
+of record and therefore any future record will be assigned a
+higher offset or a different chunk even if a different replica
+later becomes the primary. In terms of our consistency guar-
+antees, the regions in which successful record append opera-
+tions have written their data are defined (hence consistent),
+whereas intervening regions are inconsistent (hence unde-
+fined). Our applications can deal with inconsistent regions
+as we discussed in Section 2.7.2.
+3.4 Snapshot
+The snapshot operation makes a copy of a file or a direc-
+tory tree (the “source”) almost instantaneously, while min-
+imizing any interruptions of ongoing mutations. Our users
+use it to quickly create branch copies of huge data sets (and
+often copies of those copies, recursively), or to checkpoint
+the current state before experimenting with changes that
+can later be committed or rolled back easily.
+Like AFS [5], we use standard copy-on-write techniques to
+implement snapshots. When the master receives a snapshot
+request, it first revokes any outstanding leases on the chunks
+in the files it is about to snapshot. This ensures that any
+subsequent writes to these chunks will require an interaction
+with the master to find the lease holder. This will give the
+master an opportunity to create a new copy of the chunk
+first.
+After the leases have been revoked or have expired, the
+master logs the operation to disk. It then applies this log
+record to its in-memory state by duplicating the metadata
+for the source file or directory tree. The newly created snap-
+shot files point to the same chunks as the source files.
+The first time a client wants to write to a chunk C after
+the snapshot operation, it sends a request to the master to
+find the current lease holder. The master notices that the
+reference count for chunk C is greater than one. It defers
+replying to the client request and instead picks a new chunk
+handle C’. It then asks each chunkserver that has a current
+replica of C to create a new chunk called C’. By creating
+the new chunk on the same chunkservers as the original, we
+ensure that the data can be copied locally, not over the net-
+work (our disks are about three times as fast as our 100 Mb
+Ethernet links). From this point, request handling is no dif-
+ferent from that for any chunk: the master grants one of the
+replicas a lease on the new chunk C’ and replies to the client,
+which can write the chunk normally, not knowing that it has
+just been created from an existing chunk.
+4. MASTER OPERATION
+The master executes all namespace operations. In addi-
+tion, it manages chunk replicas throughout the system: it
+makes placement decisions, creates new chunks and hence
+replicas, and coordinates various system-wide activities to
+keep chunks fully replicated, to balance load across all the
+chunkservers, and to reclaim unused storage. We now dis-
+cuss each of these topics.
+4.1 Namespace Management and Locking
+Many master operations can take a long time: for exam-
+ple, a snapshot operation has to revoke chunkserver leases on
+all chunks covered by the snapshot. We do not want to delay
+other master operations while they are running. Therefore,
+we allow multiple operations to be active and use locks over
+regions of the namespace to ensure proper serialization.
+Unlike many traditional file systems, GFS does not have
+a per-directory data structure that lists all the files in that
+directory. Nor does it support aliases for the same file or
+directory (i.e, hard or symbolic links in Unix terms). GFS
+logically represents its namespace as a lookup table mapping
+full pathnames to metadata. With prefix compression, this
+table can be efficiently represented in memory. Each node
+in the namespace tree (either an absolute file name or an
+absolute directory name) has an associated read-write lock.
+Each master operation acquires a set of locks before it
+runs. Typically, if it involves /d1/d2/.../dn/leaf, it will

@@ -1,0 +1,4 @@
+<%@ page contentType="text/html;charset=UTF-8"%><tr><td><a href="topic/detail.html?t_id=${topic.id}"" title="${topic.topicTitle}">${fn:substring(topic.topicTitle,0,14)}..</a></td>
+<td title="${topic.authorName}">${topic.authorName}</td>
+<td>${topic.replyCount}</td>
+<td>${topic.latestReplyDate==""?topic.pubDate:topic.latestReplyDate}</td> </tr>

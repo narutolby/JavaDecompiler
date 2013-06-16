@@ -1,0 +1,153 @@
+/* CSS Document */
+
+.content_left {
+    width: 587px;
+    min-height: 627px;
+    float: left;
+    text-align: left;
+    margin-left: 39px;
+    margin-top: 25px;
+}
+
+.content_title {
+    padding: 0;
+    margin: 0;
+    line-height: 11px;
+}
+
+.content_title h4 {
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+    font-weight: bold;
+    color: #363636;
+}
+
+.content_title p {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #333333;
+}
+
+.main_content {
+    color: #333333;
+    height: 44px;
+    border-top: 1px #CCCCCC solid;
+    border-bottom: 1px #CCCCCC solid;
+    text-indent: 35px;
+}
+
+.goback {
+    text-align: right;
+    margin-top: 22px;
+    margin-right: 9px;
+}
+
+.content_middle {
+    min-height: 100px;
+    padding: 0;
+}
+
+.remark {
+    height: 31px;
+    border-bottom: 1px #CCCCCC solid;
+    margin-top: 3px;
+}
+
+ .info {
+    background: #F1F9FB;
+    color: #333333;
+    width: 584px;
+    margin-top: 8px;
+    padding-bottom: 7px;
+    height: 28px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.info_left {
+    float: left;
+    margin-left: 16px;
+}
+
+.info_right {
+    float: right;
+    margin:5px 17px;
+}
+
+.reply {
+    margin-left: 20px;
+    color: #333333;
+    white-space: pre-wrap;
+    line-height:17px;
+}
+
+.quote {
+    border: 1px #CCCCCC solid;
+    height: 49px;
+    width: 527px;
+    color: #676767;
+    text-indent: 24px;
+    vertical-align: middle;
+    margin-left: 23px;
+    margin-top: 7px;
+}
+
+.edit_input {
+    border: 1px #CCCCCC solid;
+    width: 386px;
+    height: 80px;
+    margin-bottom: 4px;
+    margin-top: 8px;
+    border-radius: 4px;
+}
+.reply_input {
+    border: 1px #CCCCCC solid;
+    width: 586px;
+    height: 137px;
+    margin-top: 8px;
+}
+
+#btn_reply {
+    margin: 10px;
+    float: left;
+}
+
+#btn_reply {
+    background: url(../img/zr_btn_reply.jpg) no-repeat;
+    width: 79px;
+    height: 34px;
+    border: none;
+    cursor: pointer;
+    cursor: hand;
+}
+
+.sidebar {
+    width: 282px;
+    float: right;
+}
+
+.sidebar h3 {
+    height: 38px;
+    background: url(../img/zr_sidebar.jpg) no-repeat;
+}
+
+.sidebar ul {
+    text-align: left;
+}
+
+.sidebar li {
+    margin: 15px;
+}
+
+.sidebar li a {
+    color: #333333;
+}
+
+.active {
+    background: #B1D85C;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 3px 5px;
+    cursor: pointer;
+    cursor: hand;
+}

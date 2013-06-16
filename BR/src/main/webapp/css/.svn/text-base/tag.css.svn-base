@@ -1,0 +1,56 @@
+#tagAll{
+    border: 1px #B6DBEC solid;
+    background: url("../img/tag_bg.jpg") repeat-x;
+    margin-bottom: 30px;
+}
+
+#tagHead{
+    height:15px;
+    padding: 5px 20px;
+}
+
+#tagTitle{
+    float:left;
+}
+
+#btn_tagAll{
+    float: right;
+}
+
+#tagList{
+    padding-top: 10px;
+}
+
+.subTagList{
+    border-bottom: 1px dashed #DDD;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+#tagList li ul{
+    overflow: hidden;
+}
+
+#tagList li ul li{
+    float:left;
+    width:62px;
+    font-family: Arial,Helvetica,sans-serif;
+}
+
+#listTitle{
+    text-align: left;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.subTagList ul li a:hover{
+     background: #D1EDFA;
+ }
+
+#tagAdd{
+    background: url("../img/icon_add.jpg") no-repeat;
+}
+
+#tagDel{
+    background: url("../img/icon_del.jpg") no-repeat;
+}

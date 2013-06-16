@@ -1,0 +1,56 @@
+10
+
+dir
+0
+svn://211.151.57.197/BR/src/main/java/com/bupt/pcncad/pattern
+svn://211.151.57.197
+add
+
+
+
+
+
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+2a932f70-87d7-4e8e-96fd-45b92492e6a5
+
+A.java
+file
+
+
+
+add
+
+DymicProxy.java
+file
+
+
+
+add
+
+Tiger.java
+file
+
+
+
+add
+
+TreadTest.java
+file
+
+
+
+add
+

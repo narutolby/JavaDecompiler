@@ -1,0 +1,57 @@
+.pagi{
+    margin: 15px 0px;
+}
+
+.pagi b{
+    display:inline-block;
+    background:url(../img/bg_pagination.gif) no-repeat left top;
+    text-decoration:none;
+    padding-left:8px;
+    color:#FFF;
+}
+.pagi b:hover{ background:url(../img/bg_pagination.gif) no-repeat left -24px;
+    color:#000;
+}
+.pagi b span{
+    display:inline-block;
+    background:url(../img/bg_pagination.gif) no-repeat right top;
+    height:24px;
+    line-height:24px;
+    padding-right:8px;
+    cursor:pointer;
+}
+.pagi b:hover span{
+    background:url(../img/bg_pagination.gif) no-repeat right -24px;
+}
+.page {
+    color: #333333;
+    overflow: hidden;
+}
+
+.page ul{
+    float: right;
+}
+.page li {
+    display: inline;
+    padding-top: 6px;
+}
+.page .main-page{
+    float:left;
+}
+
+.page li a {
+    border: 1px solid #DDD;
+    margin: 0 1px 0 1px;
+    padding: 0 9px 0 9px;
+    float: left;
+    line-height: 23px;
+}
+.page li a:link,.page li a:visited {
+    color: #369;
+    text-decoration: none;
+}
+.page li.current a,.page li a:hover{
+    background: #0078B6;
+    color: #ffffff;
+    text-decoration: none;
+}

@@ -1,0 +1,89 @@
+acquire read-locks on the directory names /d1, /d1/d2, ...,
+/d1/d2/.../dn, and either a read lock or a write lock on the
+full pathname /d1/d2/.../dn/leaf. Note that leaf may be
+a file or directory depending on the operation.
+We now illustrate how this locking mechanism can prevent
+a file /home/user/foo from being created while /home/user
+is being snapshotted to /save/user. The snapshot oper-
+ation acquires read locks on /home and /save, and write
+locks on /home/user and /save/user. The file creation ac-
+quires read locks on /home and /home/user, and a write
+lock on /home/user/foo. The two operations will be seri-
+alized properly because they try to obtain conflicting locks
+on /home/user. File creation does not require a write lock
+on the parent directory because there is no “directory”, or
+inode-like, data structure to be protected from modification.
+The read lock on the name is sufficient to protect the parent
+directory from deletion.
+One nice property of this locking scheme is that it allows
+concurrent mutations in the same directory. For example,
+multiple file creations can be executed concurrently in the
+same directory: each acquires a read lock on the directory
+name and a write lock on the file name. The read lock on
+the directory name suffices to prevent the directory from
+being deleted, renamed, or snapshotted. The write locks on
+file names serialize attempts to create a file with the same
+name twice.
+Since the namespace can have many nodes, read-write lock
+objects are allocated lazily and deleted once they are not in
+use. Also, locks are acquired in a consistent total order
+to prevent deadlock: they are first ordered by level in the
+namespace tree and lexicographically within the same level.
+4.2 Replica Placement
+A GFS cluster is highly distributed at more levels than
+one. It typically has hundreds of chunkservers spread across
+many machine racks. These chunkservers in turn may be
+accessed from hundreds of clients from the same or different
+racks. Communication between two machines on different
+racks may cross one or more network switches. Addition-
+ally, bandwidth into or out of a rack may be less than the
+aggregate bandwidth of all the machines within the rack.
+Multi-level distribution presents a unique challenge to dis-
+tribute data for scalability, reliability, and availability.
+The chunk replica placement policy serves two purposes:
+maximize data reliability and availability, and maximize net-
+work bandwidth utilization. For both, it is not enough to
+spread replicas across machines, which only guards against
+disk or machine failures and fully utilizes each machine’s net-
+work bandwidth. We must also spread chunk replicas across
+racks. This ensures that some replicas of a chunk will sur-
+vive and remain available even if an entire rack is damaged
+or offline (for example, due to failure of a shared resource
+like a network switch or power circuit). It also means that
+traffic, especially reads, for a chunk can exploit the aggre-
+gate bandwidth of multiple racks. On the other hand, write
+traffic has to flow through multiple racks, a tradeoff we make
+willingly.
+4.3 Creation, Re-replication, Rebalancing
+Chunk replicas are created for three reasons: chunk cre-
+ation, re-replication, and rebalancing.
+When the master creates a chunk, it chooses where to
+place the initially empty replicas. It considers several fac-
+tors. (1) We want to place new replicas on chunkservers with
+below-average disk space utilization. Over time this will
+equalize disk utilization across chunkservers. (2) We want to
+limit the number of “recent” creations on each chunkserver.
+Although creation itself is cheap, it reliably predicts immi-
+nent heavy write traffic because chunks are created when de-
+manded by writes, and in our append-once-read-many work-
+load they typically become practically read-only once they
+have been completely written. (3) As discussed above, we
+want to spread replicas of a chunk across racks.
+The master re-replicates a chunk as soon as the number
+of available replicas falls below a user-specified goal. This
+could happen for various reasons: a chunkserver becomes
+unavailable, it reports that its replica may be corrupted, one
+of its disks is disabled because of errors, or the replication
+goal is increased. Each chunk that needs to be re-replicated
+is prioritized based on several factors. One is how far it is
+from its replication goal. For example, we give higher prior-
+ity to a chunk that has lost two replicas than to a chunk that
+has lost only one. In addition, we prefer to first re-replicate
+chunks for live files as opposed to chunks that belong to re-
+cently deleted files (see Section 4.4). Finally, to minimize
+the impact of failures on running applications, we boost the
+priority of any chunk that is blocking client progress.
+The master picks the highest priority chunk and “clones”
+it by instructing some chunkserver to copy the chunk data
+directly from an existing valid replica. The new replica is
+placed with goals similar to those for creation: equalizing

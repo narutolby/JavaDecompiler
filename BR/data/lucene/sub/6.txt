@@ -1,0 +1,93 @@
+data, the client sends a write request to the primary.
+The request identifies the data pushed earlier to all of
+the replicas. The primary assigns consecutive serial
+numbers to all the mutations it receives, possibly from
+multiple clients, which provides the necessary serial-
+ization. It applies the mutation to its own local state
+in serial number order.
+The primary forwards the write request to all sec-
+ondary replicas. Each secondary replica applies mu-
+tations in the same serial number order assigned by
+the primary.
+The secondaries all reply to the primary indicating
+that they have completed the operation.
+The primary replies to the client. Any errors encoun-
+tered at any of the replicas are reported to the client.
+In case of errors, the write may have succeeded at the
+primary and an arbitrary subset of the secondary repli-
+cas. (If it had failed at the primary, it would not
+have been assigned a serial number and forwarded.)
+The client request is considered to have failed, and the
+modified region is left in an inconsistent state. Our
+client code handles such errors by retrying the failed
+mutation. It will make a few attempts at steps (3)
+through (7) before falling back to a retry from the be-
+ginning of the write.
+If a write by the application is large or straddles a chunk
+boundary, GFS client code breaks it down into multiple
+write operations. They all follow the control flow described
+above but may be interleaved with and overwritten by con-
+current operations from other clients. Therefore, the shared
+We decouple the flow of data from the flow of control to
+use the network efficiently. While control flows from the
+client to the primary and then to all secondaries, data is
+pushed linearly along a carefully picked chain of chunkservers
+in a pipelined fashion. Our goals are to fully utilize each
+machine’s network bandwidth, avoid network bottlenecks
+and high-latency links, and minimize the latency to push
+through all the data.
+To fully utilize each machine’s network bandwidth, the
+data is pushed linearly along a chain of chunkservers rather
+than distributed in some other topology (e.g., tree). Thus,
+each machine’s full outbound bandwidth is used to trans-
+fer the data as fast as possible rather than divided among
+multiple recipients.
+To avoid network bottlenecks and high-latency links (e.g.,
+inter-switch links are often both) as much as possible, each
+machine forwards the data to the “closest” machine in the
+network topology that has not received it. Suppose the
+client is pushing data to chunkservers S1 through S4. It
+sends the data to the closest chunkserver, say S1. S1 for-
+wards it to the closest chunkserver S2 through S4 closest to
+S1, say S2. Similarly, S2 forwards it to S3 or S4, whichever
+is closer to S2, and so on. Our network topology is simple
+enough that “distances” can be accurately estimated from
+IP addresses.
+Finally, we minimize latency by pipelining the data trans-
+fer over TCP connections. Once a chunkserver receives some
+data, it starts forwarding immediately. Pipelining is espe-
+cially helpful to us because we use a switched network with
+full-duplex links. Sending the data immediately does not
+reduce the receive rate. Without network congestion, the
+ideal elapsed time for transferring B bytes to R replicas is
+B/T + RL where T is the network throughput and L is la-
+tency to transfer bytes between two machines. Our network
+links are typically 100 Mbps (T ), and L is far below 1 ms.
+Therefore, 1 MB can ideally be distributed in about 80 ms.
+3.3 Atomic Record Appends
+GFS provides an atomic append operation called record
+append. In a traditional write, the client specifies the off-
+set at which data is to be written. Concurrent writes to
+the same region are not serializable: the region may end up
+containing data fragments from multiple clients. In a record
+append, however, the client specifies only the data. GFS
+appends it to the file at least once atomically (i.e., as one
+continuous sequence of bytes) at an offset of GFS’s choosing
+and returns that offset to the client. This is similar to writ-
+ing to a file opened in O APPEND mode in Unix without the
+race conditions when multiple writers do so concurrently.
+Record append is heavily used by our distributed applica-
+tions in which many clients on different machines append
+to the same file concurrently. Clients would need addi-
+tional complicated and expensive synchronization, for ex-
+ample through a distributed lock manager, if they do so
+with traditional writes. In our workloads, such files often
+serve as multiple-producer/single-consumer queues or con-
+tain merged results from many different clients.
+Record append is a kind of mutation and follows the con-
+trol flow in Section 3.1 with only a little extra logic at the
+primary. The client pushes the data to all replicas of the
+last chunk of the file Then, it sends its request to the pri-
+mary. The primary checks to see if appending the record
+to the current chunk would cause the chunk to exceed the
+maximum size (64 MB). If so, it pads the chunk to the max-

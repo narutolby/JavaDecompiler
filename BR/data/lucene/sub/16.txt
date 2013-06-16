@@ -1,0 +1,91 @@
+tolerance.
+As disks are relatively cheap and replication is simpler
+than more sophisticated RAID [9] approaches, GFS cur-
+rently uses only replication for redundancy and so consumes
+more raw storage than xFS or Swift.
+In contrast to systems like AFS, xFS, Frangipani [12], and
+Intermezzo [6], GFS does not provide any caching below the
+file system interface. Our target workloads have little reuse
+within a single application run because they either stream
+through a large data set or randomly seek within it and read
+small amounts of data each time.
+Some distributed file systems like Frangipani, xFS, Min-
+nesota’s GFS[11] and GPFS [10] remove the centralized server
+and rely on distributed algorithms for consistency and man-
+agement. We opt for the centralized approach in order to
+simplify the design, increase its reliability, and gain flexibil-
+ity. In particular, a centralized master makes it much easier
+to implement sophisticated chunk placement and replication
+policies since the master already has most of the relevant
+information and controls how it changes. We address fault
+tolerance by keeping the master state small and fully repli-
+cated on other machines. Scalability and high availability
+(for reads) are currently provided by our shadow master
+mechanism. Updates to the master state are made persis-
+tent by appending to a write-ahead log. Therefore we could
+adapt a primary-copy scheme like the one in Harp [7] to pro-
+vide high availability with stronger consistency guarantees
+than our current scheme.
+We are addressing a problem similar to Lustre [8] in terms
+of delivering aggregate performance to a large number of
+clients. However, we have simplified the problem signifi-
+cantly by focusing on the needs of our applications rather
+than building a POSIX-compliant file system. Additionally,
+GFS assumes large number of unreliable components and so
+fault tolerance is central to our design.
+GFS most closely resembles the NASD architecture [4].
+While the NASD architecture is based on network-attached
+disk drives, GFS uses commodity machines as chunkservers,
+as done in the NASD prototype. Unlike the NASD work,
+our chunkservers use lazily allocated fixed-size chunks rather
+than variable-length objects. Additionally, GFS implements
+features such as rebalancing, replication, and recovery that
+are required in a production environment.
+Unlike Minnesota’s GFS and NASD, we do not seek to
+alter the model of the storage device. We focus on ad-
+dressing day-to-day data processing needs for complicated
+distributed systems with existing commodity components.
+The producer-consumer queues enabled by atomic record
+appends address a similar problem as the distributed queues
+in River [2]. While River uses memory-based queues dis-
+tributed across machines and careful data flow control, GFS
+uses a persistent file that can be appended to concurrently
+by many producers. The River model supports m-to-n dis-
+tributed queues but lacks the fault tolerance that comes with
+persistent storage, while GFS only supports m-to-1 queues
+efficiently. Multiple consumers can read the same file, but
+they must coordinate to partition the incoming load.
+9. CONCLUSIONS
+The Google File System demonstrates the qualities es-
+sential for supporting large-scale data processing workloads
+on commodity hardware. While some design decisions are
+specific to our unique setting, many may apply to data pro-
+cessing tasks of a similar magnitude and cost consciousness.
+We started by reexamining traditional file system assump-
+tions in light of our current and anticipated application
+workloads and technological environment. Our observations
+have led to radically different points in the design space.
+We treat component failures as the norm rather than the
+exception, optimize for huge files that are mostly appended
+to (perhaps concurrently) and then read (usually sequen-
+tially), and both extend and relax the standard file system
+interface to improve the overall system.
+Our system provides fault tolerance by constant moni-
+toring, replicating crucial data, and fast and automatic re-
+covery. Chunk replication allows us to tolerate chunkserver
+failures. The frequency of these failures motivated a novel
+online repair mechanism that regularly and transparently re-
+pairs the damage and compensates for lost replicas as soon
+as possible. Additionally, we use checksumming to detect
+data corruption at the disk or IDE subsystem level, which
+becomes all too common given the number of disks in the
+system.
+Our design delivers high aggregate throughput to many
+concurrent readers and writers performing a variety of tasks.
+We achieve this by separating file system control, which
+passes through the master, from data transfer, which passes
+directly between chunkservers and clients. Master involve-
+ment in common operations is minimized by a large chunk
+size and by chunk leases, which delegates authority to pri-
+mary replicas in data mutations. This makes possible a sim-
+ple, centralized master that does not become a bottleneck.

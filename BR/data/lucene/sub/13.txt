@@ -1,0 +1,161 @@
+has a larger proportion of dead files, namely files which were
+deleted or replaced by a new version but whose storage have
+not yet been reclaimed. It also has more chunks because its
+files tend to be larger.
+6.2.2 Metadata
+The chunkservers in aggregate store tens of GBs of meta-
+data, mostly the checksums for 64 KB blocks of user data.
+The only other metadata kept at the chunkservers is the
+chunk version number discussed in Section 4.5.
+The metadata kept at the master is much smaller, only
+tens of MBs, or about 100 bytes per file on average. This
+agrees with our assumption that the size of the master’s
+memory does not limit the system’s capacity in practice.
+Most of the per-file metadata is the file names stored in a
+prefix-compressed form. Other metadata includes file own-
+ership and permissions, mapping from files to chunks, and
+each chunk’s current version. In addition, for each chunk we
+store the current replica locations and a reference count for
+implementing copy-on-write.
+Each individual server, both chunkservers and the master,
+has only 50 to 100 MB of metadata. Therefore recovery is
+fast: it takes only a few seconds to read this metadata from
+disk before the server is able to answer queries. However, the
+master is somewhat hobbled for a period – typically 30 to
+60 seconds – until it has fetched chunk location information
+from all chunkservers.
+6.2.3 Read and Write Rates
+Table 3 shows read and write rates for various time pe-
+riods. Both clusters had been up for about one week when
+these measurements were taken. (The clusters had been
+restarted recently to upgrade to a new version of GFS.)
+The average write rate was less than 30 MB/s since the
+restart. When we took these measurements, B was in the
+middle of a burst of write activity generating about 100 MB/s
+of data, which produced a 300 MB/s network load because
+writes are propagated to three replicas.
+0
+Aggregate read rate
+0
+5
+10
+Number of clients N
+40
+20
+0
+15
+Aggregate write rate
+0
+5
+10
+Number of clients N
+(a) Reads
+(b) Writes
+15
+50
+Network limit
+60
+Network limit
+100
+Network limit
+10
+5
+Aggregate append rate
+0
+0
+5
+10
+Number of clients N
+15
+(c) Record appends
+Figure 3: Aggregate Throughputs. Top curves show theoretical limits imposed by our network topology. Bottom curves
+show measured throughputs. They have error bars that show 95% confidence intervals, which are illegible in some cases
+because of low variance in measurements.
+Cluster
+Read rate (last minute)
+Read rate (last hour)
+Read rate (since restart)
+Write rate (last minute)
+Write rate (last hour)
+Write rate (since restart)
+Master ops (last minute)
+Master ops (last hour)
+Master ops (since restart)
+583
+562
+589
+1
+2
+25
+325
+381
+202
+A
+MB/s
+MB/s
+MB/s
+MB/s
+MB/s
+MB/s
+Ops/s
+Ops/s
+Ops/s
+380
+384
+49
+101
+117
+13
+533
+518
+347
+B
+MB/s
+MB/s
+MB/s
+MB/s
+MB/s
+MB/s
+Ops/s
+Ops/s
+Ops/s
+Table 3: Performance Metrics for Two GFS Clusters
+The read rates were much higher than the write rates.
+The total workload consists of more reads than writes as we
+have assumed. Both clusters were in the middle of heavy
+read activity. In particular, A had been sustaining a read
+rate of 580 MB/s for the preceding week. Its network con-
+figuration can support 750 MB/s, so it was using its re-
+sources efficiently. Cluster B can support peak read rates of
+1300 MB/s, but its applications were using just 380 MB/s.
+6.2.4 Master Load
+Table 3 also shows that the rate of operations sent to the
+master was around 200 to 500 operations per second. The
+master can easily keep up with this rate, and therefore is
+not a bottleneck for these workloads.
+In an earlier version of GFS, the master was occasionally
+a bottleneck for some workloads. It spent most of its time
+sequentially scanning through large directories (which con-
+tained hundreds of thousands of files) looking for particular
+files. We have since changed the master data structures to
+allow efficient binary searches through the namespace. It
+can now easily support many thousands of file accesses per
+second. If necessary, we could speed it up further by placing
+name lookup caches in front of the namespace data struc-
+tures.
+6.2.5 Recovery Time
+After a chunkserver fails, some chunks will become under-
+replicated and must be cloned to restore their replication
+levels. The time it takes to restore all such chunks depends
+on the amount of resources. In one experiment, we killed a
+single chunkserver in cluster B. The chunkserver had about
+15,000 chunks containing 600 GB of data. To limit the im-
+pact on running applications and provide leeway for schedul-
+ing decisions, our default parameters limit this cluster to
+91 concurrent clonings (40% of the number of chunkservers)
+where each clone operation is allowed to consume at most
+6.25 MB/s (50 Mbps). All chunks were restored in 23.2 min-
+utes, at an effective replication rate of 440 MB/s.
+In another experiment, we killed two chunkservers each
+with roughly 16,000 chunks and 660 GB of data. This double
+failure reduced 266 chunks to having a single replica. These
